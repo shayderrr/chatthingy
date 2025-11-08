@@ -2,25 +2,11 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>🔥 My Chat</title>
+  <title>🔥 My Chat (Fixed)</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background: #f8f8f8;
-    }
-    #messages {
-      border: 1px solid #ccc;
-      background: white;
-      padding: 10px;
-      height: 300px;
-      overflow-y: auto;
-      border-radius: 8px;
-    }
-    input, button {
-      padding: 8px;
-      margin-top: 8px;
-    }
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f8f8f8; }
+    #messages { border: 1px solid #ccc; background: white; padding: 10px; height: 300px; overflow-y: auto; border-radius: 8px; }
+    input, button { padding: 8px; margin-top: 8px; }
   </style>
 </head>
 <body>
@@ -30,12 +16,12 @@
   <input id="message" placeholder="Type a message">
   <button onclick="sendMessage()">Send</button>
 
-  <!-- Firebase CDN SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"></script>
+  <!-- ✅ Modular Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-  <script>
-    // ✅ Your Firebase config (converted for browser use)
+    // Your Firebase config (from your console)
     const firebaseConfig = {
       apiKey: "AIzaSyAeU8eUerKxRSo4T_3Fc9uC9SnHeF-qZrI",
       authDomain: "my-chat-project-112b9.firebaseapp.com",
@@ -47,25 +33,26 @@
       measurementId: "G-705X5D246R"
     };
 
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    // Initialize Firebase and DB
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-    const messagesDiv = document.getElementById('messages');
+    const messagesDiv = document.getElementById("messages");
 
-    function sendMessage() {
-      const name = document.getElementById('name').value;
-      const msg = document.getElementById('message').value;
+    // 📨 Send message
+    window.sendMessage = function() {
+      const name = document.getElementById("name").value.trim();
+      const msg = document.getElementById("message").value.trim();
       if (!name || !msg) return;
 
-      db.ref('messages').push({ name, msg });
-      document.getElementById('message').value = '';
-    }
+      push(ref(db, "messages"), { name, msg });
+      document.getElementById("message").value = "";
+    };
 
-    // Listen for new messages
-    db.ref('messages').on('child_added', (snapshot) => {
+    // 💬 Listen for new messages
+    onChildAdded(ref(db, "messages"), (snapshot) => {
       const { name, msg } = snapshot.val();
-      const div = document.createElement('div');
+      const div = document.createElement("div");
       div.textContent = `${name}: ${msg}`;
       messagesDiv.appendChild(div);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
